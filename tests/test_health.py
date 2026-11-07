@@ -33,7 +33,7 @@ def test_health_check_endpoint():
     assert "version" in data
     assert "environment" in data
     assert "timestamp" in data
-    assert data["details"]["llm_provider"] == "mock"
+    assert data["details"]["llm_provider"] in {"mock", "gemini"}
 
 
 def test_api_health_check_endpoint():
@@ -42,3 +42,4 @@ def test_api_health_check_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
+

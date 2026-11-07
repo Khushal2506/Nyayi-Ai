@@ -26,10 +26,8 @@ export interface LegalSource {
   section: string;
   title: string;
   year: number;
-  officialExcerpt: string;
+  referenceExcerpt: string;
   plainSummary: string;
-  applicationToCase: string;
-  relevanceScore: number;
 }
 
 export interface ChatMessage {
@@ -88,7 +86,7 @@ export const INITIAL_TIMELINE: TimelineEvent[] = [
     date: "14 Oct 2024, 11:24 AM",
     title: "Order Placed & Payment Debited",
     category: "purchase",
-    description: "Paid ₹64,999 via UPI for Zephyrus Pro Laptop on NexaCart with guaranteed next-day dispatch.",
+    description: "Paid ₹64,999 via UPI for Zephyrus Pro Laptop on NexaCart with stated next-day dispatch.",
     evidenceRef: "GST Tax Invoice #GST-KA-2024-99120",
   },
   {
@@ -185,17 +183,15 @@ export const INITIAL_EVIDENCE: EvidenceItem[] = [
   },
 ];
 
-export const REAL_LEGAL_SOURCES: LegalSource[] = [
+export const ILLUSTRATIVE_LEGAL_REFERENCES: LegalSource[] = [
   {
     id: "sec-2-10",
     act: "Consumer Protection Act, 2019",
     section: "Section 2(10)",
     title: "Definition of 'Defect'",
     year: 2019,
-    officialExcerpt: "'Defect' means any fault, imperfection or shortcoming in the quality, quantity, potency, purity or standard which is required to be maintained by or under any law for the time being in force or under any contract, express or implied, or as is claimed by the trader in any manner whatsoever in relation to any goods.",
+    referenceExcerpt: "'Defect' means any fault, imperfection or shortcoming in the quality, quantity, potency, purity or standard which is required to be maintained by or under any law for the time being in force or under any contract, express or implied, or as is claimed by the trader in any manner whatsoever in relation to any goods.",
     plainSummary: "If goods do not match promised quality or fail to perform their basic intended function, they are legally 'defective'.",
-    applicationToCase: "The permanent display controller failure certified by the brand engineer constitutes a statutory defect under Section 2(10).",
-    relevanceScore: 98,
   },
   {
     id: "sec-2-47",
@@ -203,10 +199,8 @@ export const REAL_LEGAL_SOURCES: LegalSource[] = [
     section: "Section 2(47)",
     title: "Unfair Trade Practice — Refusal of Return / Refund",
     year: 2019,
-    officialExcerpt: "'Unfair trade practice' means a trade practice which, for the purpose of promoting the sale, use or supply of any goods or for the provision of any service, adopts any unfair method or unfair or deceptive practice including... refusing to take back or withdraw defective goods or to refund the consideration contemplated within the period stipulated.",
-    plainSummary: "It is an illegal unfair trade practice for a merchant or e-commerce platform to refuse a return or refund on defective goods delivered to a buyer.",
-    applicationToCase: "NexaCart's unilateral rejection of the verified 7-day return directly violates Section 2(47)(viii).",
-    relevanceScore: 99,
+    referenceExcerpt: "'Unfair trade practice' means a trade practice which, for the purpose of promoting the sale, use or supply of any goods or for the provision of any service, adopts any unfair method or unfair or deceptive practice including... refusing to take back or withdraw defective goods or to refund the consideration contemplated within the period stipulated.",
+    plainSummary: "Section 2(47) covers specified unfair or deceptive trade practices, including certain refusals to take back defective goods or refund consideration within the stipulated period. Applicability depends on the facts and current law.",
   },
   {
     id: "ecom-rule-5",
@@ -214,22 +208,10 @@ export const REAL_LEGAL_SOURCES: LegalSource[] = [
     section: "Rule 5(3) & Rule 6(2)",
     title: "Mandatory Grievance Redressal & Return Obligations",
     year: 2020,
-    officialExcerpt: "Every marketplace e-commerce entity shall ensure that the grievance officer acknowledges the receipt of any consumer complaint within forty-eight hours and redresses the complaint within one month from the date of receipt of the complaint... No e-commerce entity shall refuse to take back goods, or withdraw or discontinue services purchased... if such goods are defective, deficient or delivered late.",
-    plainSummary: "E-commerce platforms are legally obligated to acknowledge complaints within 48 hours and cannot refuse return of defective goods.",
-    applicationToCase: "NexaCart failed to respond to the nodal grievance escalation within 48 hours, violating Rule 5(3).",
-    relevanceScore: 95,
+    referenceExcerpt: "Every marketplace e-commerce entity shall ensure that the grievance officer acknowledges the receipt of any consumer complaint within forty-eight hours and redresses the complaint within one month from the date of receipt of the complaint... No e-commerce entity shall refuse to take back goods, or withdraw or discontinue services purchased... if such goods are defective, deficient or delivered late.",
+    plainSummary: "The E-Commerce Rules include grievance-handling timelines and duties concerning certain defective, deficient or late-delivered goods. Check the precise rule and its applicability to the entity and facts.",
   },
-  {
-    id: "prec-ncdrc-1",
-    act: "National Consumer Disputes Redressal Commission (NCDRC)",
-    section: "Revision Petition No. 2914 of 2018",
-    title: "Tata Motors Ltd. vs. Rajesh Tyagi & Anr.",
-    year: 2019,
-    officialExcerpt: "When a brand-new electronic or mechanical product manifests an irremediable hardware defect immediately upon delivery, the consumer cannot be compelled to endure endless service center repairs; the consumer is entitled in law to full refund of consideration or replacement with brand-new product.",
-    plainSummary: "Consumers do not have to accept repetitive repairs on a brand new dead-on-arrival item; they are entitled to a refund.",
-    applicationToCase: "Establishes complainant's right to insist on a monetary refund rather than accepting a refurbished motherboard replacement.",
-    relevanceScore: 92,
-  },
+
 ];
 
 export const INITIAL_CHAT: ChatMessage[] = [
@@ -249,7 +231,7 @@ export const INITIAL_CHAT: ChatMessage[] = [
     id: "msg-3",
     sender: "assistant",
     timestamp: "10:33 AM",
-    content: "I understand how distressing this is. Since the defect was confirmed within 7 days by an authorized brand engineer, NexaCart's refusal constitutes an 'Unfair Trade Practice' under Section 2(47) of the Consumer Protection Act, 2019.",
+    content: "I understand how distressing this is. The facts may raise issues under consumer-protection law, but the applicable provisions and remedy depend on the evidence and circumstances. The relevant statutory text should be verified before drawing a legal conclusion.",
     extractedFacts: [
       { label: "Opposite Party", value: "NexaCart Retail India Pvt. Ltd." },
       { label: "Transaction Value", value: "₹64,999" },
@@ -261,6 +243,6 @@ export const INITIAL_CHAT: ChatMessage[] = [
     id: "msg-4",
     sender: "assistant",
     timestamp: "10:33 AM",
-    content: "To build a foolproof pre-litigation legal notice, did you receive NexaCart's rejection in writing (via email or support ticket response)?",
+    content: "To understand the available next steps, did you receive NexaCart's rejection in writing (via email or support ticket response)?",
   },
 ];

@@ -35,23 +35,14 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
 
   const verifiedCount = evidenceList.filter(e => e.status === 'verified').length;
   const missingCount = evidenceList.filter(e => e.status === 'missing').length;
-  const readinessPercent = Math.round((verifiedCount / evidenceList.length) * 100);
+  const sampleChecklistPercent = Math.round((verifiedCount / evidenceList.length) * 100);
 
-  const handleResolveMissing = (id: string) => {
-    setEvidenceList(prev => prev.map(item => {
-      if (item.id === id) {
-        return {
-          ...item,
-          status: 'verified',
-          fileName: `${item.title.replace(/\s+/g, '_')}_Document.pdf`,
-          fileSize: '620 KB',
-          dateAdded: 'Today',
-        };
-      }
-      return item;
-    }));
-
-    onNotify('success', 'Evidence Recorded', 'Document marked as resolved. Evidence readiness score improved.');
+  const handleResolveMissing = (_id: string) => {
+    onNotify(
+      'info',
+      'Verification is not connected',
+      'This prototype does not upload or verify files yet. No evidence status was changed.'
+    );
   };
 
   const handleSimulatedUpload = (e: React.FormEvent) => {
@@ -65,9 +56,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
       id: `ev-${Date.now()}`,
       title: uploadTitle.trim(),
       category: uploadCategory,
-      status: 'verified',
-      fileName: `${uploadTitle.trim().replace(/\s+/g, '_')}_Uploaded.pdf`,
-      fileSize: '1.1 MB',
+      status: 'missing',
       dateAdded: 'Just now',
       priority: 'medium',
       significance: uploadSignificance.trim() || 'Supplied by complainant to corroborate factual narrative.',
@@ -77,7 +66,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
     setUploadTitle('');
     setUploadSignificance('');
     setShowUploadModal(false);
-    onNotify('success', 'Document Uploaded', 'New document verified and added to evidence registry.');
+    onNotify('info', 'Demo entry added', 'Only document metadata was recorded locally. No file was uploaded or verified.');
   };
 
   const filteredEvidence = evidenceList.filter(item => {
@@ -88,23 +77,23 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
-      {/* Top Banner: Evidence Readiness */}
+      {/* Top Banner: Demo Checklist */}
       <div className="bg-white rounded-2xl border border-nyaya-cream-dark p-6 sm:p-8 shadow-warm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-nyaya-lavender text-nyaya-plum">
-                Evidentiary Audit
+                Demo evidence checklist
               </span>
-              <span className="text-xs font-semibold text-slate-500">
-                Rule 14, Consumer Protection (Consumer Commission Procedure) Regulations
+              <span className="text-xs font-semibold text-amber-700">
+                Demonstration checklist — not a legal audit
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-nyaya-plum">
               Evidence & Document Registry
             </h1>
             <p className="text-sm text-nyaya-text-secondary mt-1">
-              Verify documentary proof required under Indian consumer law to substantiate allegations of defect and unfair trade.
+              Track example evidence items. File upload, document inspection and independent verification are not connected in this prototype.
             </p>
           </div>
 
@@ -114,7 +103,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               className="inline-flex items-center px-4 py-2.5 rounded-xl bg-nyaya-orange hover:bg-nyaya-orange-hover text-white text-xs font-semibold shadow-orange-sm transition-all"
             >
               <Upload className="w-4 h-4 mr-2" />
-              Upload New Record
+              Add Demo Record
             </button>
             <button
               onClick={onNavigateToSources}
@@ -131,19 +120,19 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
           <div className="flex items-center justify-between text-xs font-medium mb-2">
             <span className="text-nyaya-plum font-semibold flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Case Evidentiary Strength Score: {readinessPercent}%
+              Sample Checklist Completion: {sampleChecklistPercent}%
             </span>
             <span className="text-slate-500">
-              {verifiedCount} Verified, {missingCount} Action Required
+              {verifiedCount} sample records, {missingCount} outstanding items
             </span>
           </div>
 
           <div className="w-full h-3 bg-nyaya-cream rounded-full overflow-hidden border border-nyaya-cream-dark">
             <div 
               className={`h-full rounded-full transition-all duration-500 ${
-                readinessPercent >= 80 ? 'bg-emerald-500' : 'bg-nyaya-orange'
+                sampleChecklistPercent >= 80 ? 'bg-emerald-500' : 'bg-nyaya-orange'
               }`}
-              style={{ width: `${readinessPercent}%` }}
+              style={{ width: `${sampleChecklistPercent}%` }}
             />
           </div>
         </div>
@@ -167,7 +156,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Verified ({verifiedCount})
+            Sample records ({verifiedCount})
           </button>
           <button
             onClick={() => setActiveFilter('missing')}
@@ -211,7 +200,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                   {isVerified ? (
                     <span className="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                       <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-                      Verified
+                      Sample entry
                     </span>
                   ) : (
                     <span className="inline-flex items-center text-xs font-semibold text-nyaya-orange bg-white px-2.5 py-1 rounded-full border border-nyaya-orange-border">
@@ -260,7 +249,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                     className="w-full py-2.5 rounded-xl bg-nyaya-orange hover:bg-nyaya-orange-hover text-white text-xs font-semibold shadow-orange-sm transition-all flex items-center justify-center gap-1.5"
                   >
                     <FilePlus2 className="w-4 h-4" />
-                    <span>Upload & Mark as Resolved</span>
+                    <span>Verification unavailable</span>
                   </button>
                 )}
               </div>
@@ -276,7 +265,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-nyaya-orange">
-                  Document Preview ({previewItem.category})
+                  Sample Record ({previewItem.category})
                 </span>
                 <h3 className="text-lg font-serif font-bold text-nyaya-plum mt-0.5">
                   {previewItem.title}
@@ -300,11 +289,12 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                 <span>{previewItem.fileSize}</span>
               </div>
               <div className="flex justify-between border-b border-slate-200/60 pb-2">
-                <span className="text-slate-400">Verification Hash:</span>
-                <span className="text-slate-500">SHA256: 8f4b1...e902a</span>
+                <span className="text-slate-400">Record status:</span>
+                <span className="text-amber-700">Demo data — not verified</span>
               </div>
               <div className="pt-2 text-slate-600 font-sans text-xs leading-relaxed">
-                <strong>Legal evidentiary value:</strong> {previewItem.significance}
+                <strong>Sample note:</strong> {previewItem.significance}
+                <p className="mt-2 text-amber-700">This is illustrative metadata only. No underlying file is stored or verified.</p>
               </div>
             </div>
 
@@ -331,7 +321,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               <div className="flex items-center gap-2">
                 <Upload className="w-5 h-5 text-nyaya-orange" />
                 <h3 className="text-lg font-serif font-bold text-nyaya-plum">
-                  Add Evidence Record
+                  Add Demo Evidence Record
                 </h3>
               </div>
               <button
@@ -376,7 +366,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Evidentiary Significance (Optional)
+                Description (Optional)
               </label>
               <textarea
                 rows={2}
@@ -405,7 +395,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                 type="submit"
                 className="px-5 py-2.5 rounded-xl bg-nyaya-orange hover:bg-nyaya-orange-hover text-white text-xs font-semibold shadow-orange-sm transition-all"
               >
-                Upload & Register Proof
+                Add demo record
               </button>
             </div>
           </form>

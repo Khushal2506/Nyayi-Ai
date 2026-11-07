@@ -14,7 +14,7 @@ class FakeModels:
         self.chunks = chunks or []
         self.calls = []
 
-    async def generate_content(self, **kwargs):
+    def generate_content(self, **kwargs):
         self.calls.append(kwargs)
         return self.response
 
@@ -31,7 +31,7 @@ def make_provider(fake):
         model="test-model"
     )
     provider._client = SimpleNamespace(
-        aio=SimpleNamespace(models=fake)
+        models=fake
     )
     return provider
 
@@ -72,7 +72,7 @@ async def test_empty_response_raises():
 
 @pytest.mark.asyncio
 async def test_stream_returns_chunks():
-    fake = FakeModels(chunks=["hello", " world"])
+    fake = FakeModels(response=SimpleNamespace(text="hello world"))
     result = "".join([
         chunk async for chunk in make_provider(fake).stream("hi")
     ])

@@ -115,7 +115,9 @@ onCaseExtracted(result);
           `${result.summary}${missingInfo}\n\n${result.disclaimer}\nProcessing: ${
             result.processing_mode === 'gemini'
               ? 'Gemini AI'
-              : 'Local rule-based fallback'
+              : result.processing_mode === 'mock'
+                ? 'Mock provider'
+                : 'Local rule-based fallback'
           }.`,
         extractedFacts
       };
@@ -350,7 +352,13 @@ onCaseExtracted(result);
               </div>
 
               <div className="text-[10px] text-slate-500 pt-2">
-                Processing mode: {caseData.processing_mode}
+                Processing mode: {
+                  caseData.processing_mode === 'gemini'
+                    ? 'Gemini AI'
+                    : caseData.processing_mode === 'mock'
+                      ? 'Mock provider'
+                      : 'Local rule-based fallback'
+                }
               </div>
             </div>
           ) : (

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { 
   LegalSource, 
-  REAL_LEGAL_SOURCES 
+  ILLUSTRATIVE_LEGAL_REFERENCES 
 } from '../data/demoCase';
 import { 
   BookOpen, 
   Search, 
-  ShieldCheck, 
-  FileText, 
-  CheckCircle2, 
+  FileText,
   Scale, 
   Copy
 } from 'lucide-react';
@@ -22,9 +20,9 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
   onNotify,
   onNavigateToStudio 
 }) => {
-  const [sources] = useState<LegalSource[]>(REAL_LEGAL_SOURCES);
+  const [sources] = useState<LegalSource[]>(ILLUSTRATIVE_LEGAL_REFERENCES);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSource, setSelectedSource] = useState<LegalSource>(REAL_LEGAL_SOURCES[0]);
+  const [selectedSource, setSelectedSource] = useState<LegalSource>(ILLUSTRATIVE_LEGAL_REFERENCES[0]);
 
   const filteredSources = sources.filter(s => 
     s.act.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -34,9 +32,9 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
   );
 
   const handleCopyCitation = (source: LegalSource) => {
-    const citation = `${source.act}, ${source.section} — "${source.title}" (${source.year}):\n${source.officialExcerpt}`;
+    const citation = `${source.act}, ${source.section} — "${source.title}" (${source.year}):\n${source.referenceExcerpt}`;
     navigator.clipboard.writeText(citation);
-    onNotify('success', 'Statutory Citation Copied', `Copied ${source.section} to clipboard.`);
+    onNotify('success', 'Reference Text Copied', `Copied the illustrative reference text for ${source.section}.`);
   };
 
   return (
@@ -47,16 +45,16 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Verified Statutory Grounding
+                <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+                Reference Library — Verification Required
               </span>
-              <span className="text-xs text-slate-400">Zero Hallucination Guarantee</span>
+              <span className="text-xs text-slate-400">Reference material; not legal advice</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-nyaya-plum">
               Indian Consumer Law Sources & Precedents
             </h1>
             <p className="text-sm text-nyaya-text-secondary mt-1">
-              Grounded legal sections, Gazette definitions, and binding NCDRC precedents mapped to this dispute.
+              Illustrative legal references for orientation. Verify the current official text and applicability before relying on any provision.
             </p>
           </div>
 
@@ -71,18 +69,13 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
           </div>
         </div>
 
-        {/* Anti-Hallucination Policy Banner */}
+        {/* Legal reference limitation notice */}
         <div className="pt-6">
-          <div className="p-4 rounded-xl bg-nyaya-cream-light border border-nyaya-cream-dark flex items-start gap-3 text-xs text-nyaya-text-secondary">
-            <Scale className="w-5 h-5 text-nyaya-orange shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-xs text-amber-950">
+            <Scale className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
             <div>
-              <strong className="text-nyaya-plum block font-semibold mb-0.5">
-                Authenticity & Grounding Standard
-              </strong>
-              All statutory citations and case laws presented here represent authentic provisions from the 
-              <strong> Consumer Protection Act, 2019 (Act No. 35 of 2019)</strong> and 
-              <strong> Consumer Protection (E-Commerce) Rules, 2020</strong> as notified in the Gazette of India.
-              Nyaya AI never generates non-existent legal sections or fake court orders.
+              <strong className="block font-semibold mb-0.5">Reference material — not independently verified</strong>
+              This screen contains illustrative legal reference text. It is not connected to a live legal database or citation-verification service. Verify the latest official legislation, case law and applicability before relying on any citation.
             </div>
           </div>
         </div>
@@ -125,8 +118,8 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
                     }`}>
                       {source.section}
                     </span>
-                    <span className={`text-xs font-semibold ${isSelected ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                      {source.relevanceScore}% match
+                    <span className={`text-[10px] font-semibold ${isSelected ? 'text-amber-200' : 'text-amber-700'}`}>
+                      Reference item
                     </span>
                   </div>
 
@@ -172,7 +165,7 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
                 className="inline-flex items-center px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-nyaya-plum text-xs font-semibold shadow-sm transition-all shrink-0"
               >
                 <Copy className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-                Copy Citation
+                Copy Reference Text
               </button>
             </div>
 
@@ -190,28 +183,17 @@ export const SourcesScreen: React.FC<SourcesScreenProps> = ({
             {/* Official Statutory Excerpt */}
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                Official Gazette Text (Verbatim Excerpt)
+                Reference excerpt (verify against official text)
               </span>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 font-serif text-xs text-slate-800 leading-relaxed italic border-l-4 border-l-nyaya-orange">
-                "{selectedSource.officialExcerpt}"
-              </div>
-            </div>
-
-            {/* Direct Application to Rahul Sharma vs. NexaCart */}
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-2 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Application to Current Case (Why this applies)
-              </span>
-              <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-950 leading-relaxed">
-                {selectedSource.applicationToCase}
+                "{selectedSource.referenceExcerpt}"
               </div>
             </div>
 
             {/* Actions Bar */}
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
               <span className="text-xs text-slate-400">
-                Pleadable in District Consumer Commission, Bengaluru Urban
+                Check jurisdiction and current law before filing
               </span>
               <button
                 onClick={onNavigateToStudio}

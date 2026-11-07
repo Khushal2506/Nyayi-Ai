@@ -74,12 +74,20 @@ def local_extract(complaint: str) -> IntakeResponse:
 
     for match in re.finditer(date_pattern, text, re.IGNORECASE):
         date = match.group(0)
-        context = text[max(0, match.start() - 65):match.start()].lower()
+        # Classify using only the sentence containing this date. A fixed
+        # look-behind window can accidentally borrow "delivered" from the
+        # previous sentence and misclassify a later refund-request date.
+        sentence_start = max(
+            text.rfind(mark, 0, match.start()) for mark in (".", "!", "?", "\n")
+        ) + 1
+        # Use wording before the date only. Phrases after a refund date such
+        # as "I have not received it" must not reclassify that date as delivery.
+        context = text[sentence_start:match.start()].lower()
 
         if any(word in context for word in ["arrived", "delivered", "received"]):
             delivery_date = delivery_date or date
         elif any(word in context for word in [
-            "refund", "complaint", "reported", "requested", "issue"
+            "refund", "complaint", "reported", "requested", "issue", "not working", "defect"
         ]):
             issue_date = issue_date or date
         elif any(word in context for word in [
@@ -186,7 +194,8 @@ Complaint:
 """
 
     try:
-        provider = get_llm_provider(get_settings())
+        settings = get_settings()
+        provider = get_llm_provider(settings)
         raw = await provider.generate(
             prompt=prompt,
             system_prompt=SYSTEM_PROMPT,
@@ -196,7 +205,7 @@ Complaint:
         )
 
         data = json.loads(raw)
-        data["processing_mode"] = "gemini"
+        data["processing_mode"] = settings.LLM_PROVIDER.lower().strip()
         return IntakeResponse(**data)
 
     except (
