@@ -1,4 +1,6 @@
+import logging
 import json
+import logging
 import re
 
 from fastapi import APIRouter, HTTPException
@@ -8,6 +10,8 @@ from app.ai.llm.base import LLMProviderError
 from app.ai.llm.factory import get_llm_provider
 from app.core.config import get_settings
 from app.models.schemas import IntakeRequest, IntakeResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/intake", tags=["Intake"])
 
@@ -214,5 +218,6 @@ Complaint:
         ValidationError,
         ValueError,
         TypeError,
-    ):
+    ) as exc:
+        logger.exception('AI extraction failed; using local fallback: %s', type(exc).__name__)
         return local_extract(complaint)
