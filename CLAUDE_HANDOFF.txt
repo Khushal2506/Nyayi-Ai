@@ -1,0 +1,1258 @@
+﻿
+
+========== PROJECT_CONTEXT.md ==========
+# Nyaya AI â€” Project Context & Engineering Handoff Specification
+
+## 1. Product Mission & Scope
+
+**Nyaya AI** (from Sanskrit *NyÄya* meaning "justice", "logic", and "due process") is an AI-powered civic legal assistance platform engineered for ordinary Indian citizens navigating consumer disputes.
+
+In India, ordinary consumers frequently face defective goods, e-commerce refund refusals, delivery failures, and service deficiencies from merchants, airlines, telecommunications providers, and developers. While the **Consumer Protection Act, 2019** provides strong statutory remedies, average citizens lack the legal fluency to structure their claims, identify missing evidence, cite applicable legal sections, or draft formal legal notices.
+
+Nyaya AI bridges this gap as an **informational legal assistant** combining:
+- **Kuku FM-inspired warm, approachable visual identity**: welcoming, non-intimidating citizen experience.
+- **Stripe-inspired premium visual quality**: rigorous micro-interactions, responsive grid layout, and accessible visual hierarchy.
+- **Notion-inspired document drafting**: live editable clauses with inline statutory grounding tags.
+- **Distinctive original Nyaya AI identity**: grounded strictly in authentic Indian statutory acts without hallucination.
+
+> **Statutory Disclaimer**: Nyaya AI provides informational legal assistance and research automation based on public Indian statutes. It does not constitute formal legal counsel or create an advocate-client relationship under the Advocates Act, 1961.
+
+---
+
+## 2. Agreed Technology Stack & Exact Design Tokens
+
+### Design System Tokens
+| Token Name | Hex Code | Role in Interface |
+|---|---|---|
+| **Deep Plum** | `#17152B` | Primary brand canvas, header shell, text headings, and authority elements. |
+| **Vibrant Orange** | `#FF6B35` | Primary action buttons, badges, status highlights, and active indicators. |
+| **Warm Yellow** | `#FFC857` | Accent stars, advisory tags, and subtle highlight borders. |
+| **Warm Cream** | `#FFF8EF` | App background canvas, card surfaces, and document backings. |
+| **Soft Lavender** | `#E9E3F5` | Category pills, metadata tags, and soft accent containers. |
+| **White** | `#FFFFFF` | Document drafting canvas, card interiors, and modal dialogues. |
+
+### Technical Stack
+| Component | Technology | Version / Configuration | Role |
+|---|---|---|---|
+| **Frontend** | React + TypeScript + Vite | React 18.3, TypeScript 5.6, Vite 5.4 | High-performance SPA with client routing. |
+| **Styling** | Tailwind CSS | Tailwind 3.4 with custom Nyaya design tokens | Responsive utility classes with zero runtime overhead. |
+| **Backend API** | Python + FastAPI | Python 3.11+ (tested on 3.13), FastAPI 0.162 | Asynchronous ASGI REST API with Pydantic v2 schemas. |
+| **Server** | Uvicorn | 0.54.0 | ASGI web server. |
+| **LLM Engine** | Google Gemini API | `gemini-1.5-pro` (via swappable `BaseLLMProvider`) | Planned fact extraction and statutory reasoning engine. |
+| **Vector Store** | ChromaDB | Embedded local storage (`./chroma_db`) | Semantic vector indexing of statutory bare acts and precedents. |
+| **Relational DB** | SQLite | `sqlite:///./nyaya_ai.db` | Local session persistence, case briefs, and audit logs. |
+| **Testing** | Pytest + pytest-asyncio + httpx | Pytest 9.2, pytest-asyncio 1.4 | Automated backend unit and integration test suite. |
+
+---
+
+## 3. Monorepo Directory Structure
+
+```
+nyaya-ai/
+â”œâ”€â”€ .gitignore                          # Excludes secrets (.env), node_modules, Python venvs, build artifacts
+â”œâ”€â”€ .env.example                        # Canonical environment configuration template
+â”œâ”€â”€ .env                                # Local development environment (git-ignored)
+â”œâ”€â”€ README.md                           # Quickstart guide, service commands, and configuration
+â”œâ”€â”€ PROJECT_CONTEXT.md                  # Master project context, API contracts, and handoff specs
+â”œâ”€â”€ docs/
+â”‚   â”œâ”€â”€ architecture.md                 # System architecture, provider contracts, and UI flow mapping
+â”‚   â”œâ”€â”€ roadmap.md                      # Multi-milestone progress and future execution plan
+â”‚   â””â”€â”€ screenshots/                    # High-resolution screenshots of all 7 completed screens
+â”‚       â”œâ”€â”€ 01_landing_page.png
+â”‚       â”œâ”€â”€ 02_workspace_overview.png
+â”‚       â”œâ”€â”€ 03_conversational_intake.png
+â”‚       â”œâ”€â”€ 04_evidence_management.png
+â”‚       â”œâ”€â”€ 05_statutory_sources.png
+â”‚       â”œâ”€â”€ 06_document_studio.png
+â”‚       â””â”€â”€ 07_mobile_responsive.png
+â”œâ”€â”€ backend/
+â”‚   â”œâ”€â”€ .env.example                    # Backend-specific environment variables
+â”‚   â”œâ”€â”€ requirements.txt                # Pinned backend dependencies
+â”‚   â””â”€â”€ app/
+â”‚       â”œâ”€â”€ __init__.py                 # Application package metadata (version 0.1.0)
+â”‚       â”œâ”€â”€ main.py                     # FastAPI app instance, CORS middleware, router registration
+â”‚       â”œâ”€â”€ core/
+â”‚       â”‚   â”œâ”€â”€ __init__.py
+â”‚       â”‚   â””â”€â”€ config.py               # Pydantic Settings reading environment variables & .env
+â”‚       â”œâ”€â”€ models/
+â”‚       â”‚   â”œâ”€â”€ __init__.py
+â”‚       â”‚   â””â”€â”€ schemas.py              # Pydantic models (HealthResponse, diagnostic schemas)
+â”‚       â”œâ”€â”€ api/
+â”‚       â”‚   â”œâ”€â”€ __init__.py
+â”‚       â”‚   â””â”€â”€ routes/
+â”‚       â”‚       â”œâ”€â”€ __init__.py
+â”‚       â”‚       â””â”€â”€ health.py           # /health and /api/health endpoint handlers
+â”‚       â”œâ”€â”€ ai/
+â”‚       â”‚   â”œâ”€â”€ llm/
+â”‚       â”‚   â”‚   â”œâ”€â”€ __init__.py
+â”‚       â”‚   â”‚   â”œâ”€â”€ base.py             # BaseLLMProvider abstract base class
+â”‚       â”‚   â”‚   â”œâ”€â”€ mock_provider.py    # Offline MockLLMProvider for tests/local dev
+â”‚       â”‚   â”‚   â”œâ”€â”€ gemini_provider.py  # Google Gemini API provider implementation
+â”‚       â”‚   â”‚   â””â”€â”€ factory.py          # get_llm_provider() factory function
+â”‚       â”‚   â””â”€â”€ embeddings/
+â”‚       â”‚       â”œâ”€â”€ __init__.py
+â”‚       â”‚       â”œâ”€â”€ base.py             # BaseEmbeddingProvider abstract base class
+â”‚       â”‚       â”œâ”€â”€ mock_provider.py    # Deterministic MockEmbeddingProvider
+â”‚       â”‚       â””â”€â”€ factory.py          # get_embedding_provider() factory function
+â”‚       â””â”€â”€ services/                   # Modular domain service stubs for future milestones
+â”‚           â”œâ”€â”€ __init__.py
+â”‚           â”œâ”€â”€ case_intelligence/__init__.py
+â”‚           â”œâ”€â”€ rag/__init__.py
+â”‚           â”œâ”€â”€ citation/__init__.py
+â”‚           â”œâ”€â”€ document_generation/__init__.py
+â”‚           â””â”€â”€ ingestion/__init__.py
+â”œâ”€â”€ frontend/
+â”‚   â”œâ”€â”€ .env.example                    # Frontend environment template
+â”‚   â”œâ”€â”€ package.json                    # Dependencies, scripts (dev, build, preview)
+â”‚   â”œâ”€â”€ tsconfig.json                   # Strict TypeScript compiler options
+â”‚   â”œâ”€â”€ tsconfig.node.json              # Vite Node TypeScript config
+â”‚   â”œâ”€â”€ vite.config.ts                  # Vite server and React plugin setup
+â”‚   â”œâ”€â”€ tailwind.config.js              # Theme tokens (Plum, Orange, Yellow, Cream, Lavender, White)
+â”‚   â”œâ”€â”€ postcss.config.js               # PostCSS configuration
+â”‚   â”œâ”€â”€ index.html                      # HTML root with Newsreader, Inter & JetBrains Mono fonts
+â”‚   â””â”€â”€ src/
+â”‚       â”œâ”€â”€ vite-env.d.ts               # Vite client and env typing declarations
+â”‚       â”œâ”€â”€ main.tsx                    # React DOM root render
+â”‚       â”œâ”€â”€ App.tsx                     # Main layout & hash navigation manager
+â”‚       â”œâ”€â”€ index.css                   # Custom scrollbars & Notion document styles
+â”‚       â”œâ”€â”€ data/
+â”‚       â”‚   â””â”€â”€ demoCase.ts             # Realistic Indian consumer dispute dataset (CPA 2019)
+â”‚       â”œâ”€â”€ services/
+â”‚       â”‚   â””â”€â”€ api.ts                  # Typed HTTP fetcher for health diagnostics
+â”‚       â”œâ”€â”€ components/
+â”‚       â”‚   â”œâ”€â”€ Toast.tsx               # Global animated toast notification system
+â”‚       â”‚   â””â”€â”€ SystemStatus.tsx        # Live backend connectivity probe widget
+â”‚       â””â”€â”€ screens/
+â”‚           â”œâ”€â”€ LandingPage.tsx         # Screen 1: Positioning, process, disputes catalog, CTAs
+â”‚           â”œâ”€â”€ MainWorkspace.tsx       # Screen 2: Case overview shell & subnav navigation
+â”‚           â”œâ”€â”€ IntakeScreen.tsx        # Screen 3: Conversational intake chat & fact extractor
+â”‚           â”œâ”€â”€ SummaryScreen.tsx       # Screen 4: Case brief & chronological timeline
+â”‚           â”œâ”€â”€ EvidenceScreen.tsx      # Screen 5: Uploaded/missing evidence & verification
+â”‚           â”œâ”€â”€ SourcesScreen.tsx       # Screen 6: Authentic statutory acts & NCDRC inspector
+â”‚           â””â”€â”€ DocumentStudioScreen.tsx# Screen 7: Notion-style editable complaint studio
+â””â”€â”€ tests/
+    â”œâ”€â”€ __init__.py
+    â”œâ”€â”€ test_health.py                  # API test suite (root, /health, /api/health)
+    â””â”€â”€ test_llm_provider.py           # Provider test suite (Mock LLM, Gemini validation, Embedding)
+```
+
+---
+
+## 4. Completed Frontend Screens & Working Demo Interactions
+
+### Screen 1: Landing Page (`LandingPage.tsx`)
+- **Product Positioning**: Headline emphasizing accessible, grounded legal redressal for Indian consumers.
+- **CTAs**: "Launch Live Legal Workspace" and "Explore Demo Dispute" navigate directly to the workspace.
+- **4-Step Methodology**: Explains Intake &rarr; Extraction &rarr; Evidence Audit &rarr; Notice Generation.
+- **Disputes Catalog**: Realistic case categories (Dead-on-arrival electronics, e-commerce return refusals, airline fees, developer delays).
+- **Statutory Disclaimer**: Explicitly informs users about informational scope under the Advocates Act, 1961.
+- **System Health Widget**: Embeds `SystemStatus.tsx` probing FastAPI `/api/health`.
+
+### Screen 2: Main Legal Workspace Shell (`MainWorkspace.tsx`)
+- **Navigation Shell**: Top bar with brand emblem, active case pill (*Rahul Sharma vs. NexaCart*), backend status indicator (green pulse), and return link.
+- **Subnav Tabs**: 5 tabs (`overview`, `intake`, `evidence`, `sources`, `studio`) with count badges.
+- **URL Hash Synchronization**: Supports direct deep-linking via `#overview`, `#intake`, `#evidence`, `#sources`, `#studio`.
+
+### Screen 3: Conversational Legal Intake (`IntakeScreen.tsx`)
+- **Interactive Chat**: Preloaded with a realistic dialogue on dead-on-arrival laptop return refusal.
+- **Working Message Sending**: User can type custom messages and receive simulated smart responses grounded in CPA 2019 provisions (e.g. interest claims under Â§ 39(1)(d), engineer report evidentiary weight, notice requirements, territorial jurisdiction).
+- **Quick Prompt Chips**: 4 pre-configured chips for instant legal questions.
+- **Live Fact Extraction Brief**: Side panel tracking complainant, opposite party, transaction value (â‚¹64,999), and cause of action in real-time.
+
+### Screen 4: Case Summary & Chronological Timeline (`SummaryScreen.tsx`)
+- **Structured Brief**: Detailed grid displaying litigating parties, forum jurisdiction (District Commission, Bengaluru Urban), and pecuniary breakdown (â‚¹84,999 total claim).
+- **Sequential Timeline**: 6 timeline nodes with category pills, date badges, and linked evidence tags.
+- **Add Timeline Event Form**: Working inline form that prepends new factual events to the timeline.
+- **Copy Summary**: Formats and copies a structured legal brief to the system clipboard with toast feedback.
+
+### Screen 5: Evidence Management & Document Registry (`EvidenceScreen.tsx`)
+- **Dynamic Evidentiary Readiness Score**: Visual meter calculating readiness percentage (75% &rarr; 85% as items are resolved).
+- **Verified vs. Missing Tabs**: Filter evidence by all, verified (3 items), and missing action items (2 items).
+- **Record Preview Modal**: Inspect file metadata, file size, SHA256 simulation, and legal value.
+- **Resolve Missing Action**: "Upload & Mark as Resolved" button updates missing items to verified.
+- **Add Document Form**: Interactive modal to simulate new document uploads with category tags.
+
+### Screen 6: Statutory Sources & Precedents Inspector (`SourcesScreen.tsx`)
+- **Authentic Bare Acts**: Displays authentic text from:
+  - Consumer Protection Act, 2019: Section 2(10) (Defect), Section 2(47) (Unfair Trade Practice), Section 35 (Filing).
+  - Consumer Protection (E-Commerce) Rules, 2020: Rule 5(3) (48-hr grievance acknowledgment), Rule 6(2) (Return obligations).
+  - NCDRC Landmark Precedent: *Tata Motors Ltd. vs. Rajesh Tyagi & Anr.*
+- **Two-Column Inspector**: Interactive selection updates the main view with plain-language citizen summaries, verbatim Gazette excerpts, and factual application.
+- **Search & Filter**: Real-time keyword filter across bare acts and summaries.
+- **Copy Citation**: Copies formal statutory citation to clipboard.
+
+### Screen 7: Notion-Style Document Studio (`DocumentStudioScreen.tsx`)
+- **3 Statutory Presets**:
+  1. *Pre-Litigation Legal Notice (15-Day Demand to NexaCart)*
+  2. *District Consumer Commission Complaint Petition (Form 1 under CPA 2019)*
+  3. *National Consumer Helpline (NCH / INGRAM) Grievance Text*
+- **Inline Editable Clauses**: Users can edit, reword, or customize any clause directly within the document canvas.
+- **Edit vs. Print Preview Toggle**: Switch between interactive text areas and clean formatted document view.
+- **Action Suite**:
+  - "Copy All" with formatted text clipboard copy.
+  - "Print / PDF" triggering native browser print window.
+  - "Export .TXT" generating and downloading a `.txt` file.
+  - "Reset Clauses" restoring statutory preset defaults.
+
+---
+
+## 5. Verification Results
+
+| Quality Check | Execution Command | Result |
+|---|---|---|
+| **TypeScript & Build** | `npm --prefix frontend run build` | **PASSED** in 2.72s. 0 errors. Chunks generated in `frontend/dist/`. |
+| **Backend Test Suite** | `python -m pytest tests/ -v` | **6/6 PASSED** (`test_root_endpoint`, `test_health_check_endpoint`, `test_api_health_check_endpoint`, `test_mock_llm_provider`, `test_gemini_provider_requires_api_key`, `test_mock_embedding_provider`). |
+| **Screenshot Audit** | Headless Chrome capture (1366x900 & 375x812) | **7/7 captured** in `docs/screenshots/` verifying complete rendering across all screens. |
+| **Security Audit** | Pattern grep on tracked files | Zero API keys, credentials, or `.env` files tracked in Git. |
+
+---
+
+## 6. Documented Simulation & Handoff Boundaries
+
+For the upcoming engineering phase handled by Claude Code:
+1. **Conversational Intake API**: Replace simulated regex/keyword response in `IntakeScreen.tsx` with streaming POST endpoint `/api/intake/chat` backed by `GeminiLLMProvider`.
+2. **Fact Extraction Persistence**: Persist extracted facts to local SQLite via SQLAlchemy / SQLModel models.
+3. **ChromaDB Vector Retrieval**: Implement vector embedding pipeline for CPA 2019 bare acts and connect search queries to ChromaDB in `backend/app/services/rag/`.
+4. **Citation Verifier**: Connect `backend/app/services/citation/` to validate all sections cited in Document Studio before final export.
+
+
+
+========== README.md ==========
+# Nyaya AI (à¤¨à¥à¤¯à¤¾à¤¯ AI)
+
+> **AI-Powered Legal Assistance for Indian Citizens â€” Consumer Dispute Redressal**
+
+Nyaya AI is an open, civic-first legal intelligence platform engineered to assist Indian citizens in understanding their statutory rights, compiling evidence, and generating grounded complaint drafts for consumer disputes under the **Consumer Protection Act, 2019**.
+
+---
+
+## Design System Tokens
+
+The user interface combines a **Kuku FM-inspired warm visual identity**, **Stripe-inspired precision**, and a **Notion-inspired document editing experience**:
+
+- **Deep Plum**: `#17152B` (Brand identity, shell headers, and primary typography)
+- **Vibrant Orange**: `#FF6B35` (Primary CTAs, status badges, and active accents)
+- **Warm Yellow**: `#FFC857` (Highlights and advisory banners)
+- **Warm Cream**: `#FFF8EF` (Page canvas and card backgrounds)
+- **Soft Lavender**: `#E9E3F5` (Metadata tags and category pills)
+- **White**: `#FFFFFF` (Document canvas and modal dialogues)
+
+---
+
+## Completed Frontend Screens
+
+Nyaya AI features 7 fully interactive screens:
+
+1. **Landing Page**: Value positioning, 4-step consumer journey, disputes catalog, statutory disclaimer, and backend diagnostics.
+2. **Main Legal Workspace**: Navigation shell, case switcher (*Rahul Sharma vs. NexaCart*), and subnav tabs.
+3. **Conversational Legal Intake**: Interactive chat with prompt chips, realistic legal analysis, and real-time fact extraction.
+4. **Case Summary & Chronological Timeline**: Structured brief (parties, jurisdiction, relief claims) and sequential timeline with add-event capability.
+5. **Evidence Management**: Dynamic readiness score (75% to 85%), verified/missing filters, document inspector, and simulated upload.
+6. **Statutory Sources**: Authentic provisions from CPA 2019 and E-Commerce Rules 2020 with plain-language citizen translations.
+7. **Document Studio**: Notion-style editable drafting canvas with 3 statutory templates (15-Day Legal Notice, District Commission Petition, NCH Grievance), print preview, and export tools.
+
+---
+
+## Screenshots
+
+Screenshots of all views are saved in [`docs/screenshots/`](file:///c:/Users/khush/OneDrive/Desktop/nyaya-ai/docs/screenshots/):
+- `01_landing_page.png` â€” Landing page presentation
+- `02_workspace_overview.png` â€” Case overview & chronological timeline
+- `03_conversational_intake.png` â€” Conversational legal intake
+- `04_evidence_management.png` â€” Evidence management & readiness score
+- `05_statutory_sources.png` â€” Statutory sources inspector (CPA 2019)
+- `06_document_studio.png` â€” Notion-style document studio
+- `07_mobile_responsive.png` â€” Mobile responsive viewport (375x812)
+
+---
+
+## Technology Stack
+
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons
+- **Backend API**: Python 3.11+ (FastAPI, Pydantic v2, Uvicorn)
+- **AI Engine**: Google Gemini API (via swappable `BaseLLMProvider`)
+- **Vector Store**: ChromaDB (local persistence at `./chroma_db`)
+- **Relational Storage**: SQLite (`sqlite:///./nyaya_ai.db`)
+- **Testing**: Pytest, pytest-asyncio, HTTPX
+
+---
+
+## Quickstart Guide
+
+### 1. Environment Setup
+
+```bash
+# Clone or navigate to the repository
+cd nyaya-ai
+
+# Copy environment template
+cp .env.example .env
+```
+
+---
+
+### 2. Backend Setup & Run
+
+The backend is built with FastAPI and runs on port `8000`.
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Create a Python virtual environment (if not already created)
+python -m venv venv
+
+# Activate virtual environment
+# Windows PowerShell:
+.\venv\Scripts\Activate.ps1
+# macOS/Linux:
+# source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start FastAPI development server with auto-reload
+uvicorn app.main:app --reload --port 8000
+```
+
+Once started:
+- **API Root**: [http://localhost:8000/](http://localhost:8000/)
+- **Health Check**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+- **Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
+
+### 3. Frontend Setup & Run
+
+The frontend is built with React, TypeScript, Vite, and Tailwind CSS and runs on port `5173`.
+
+```bash
+# Navigate to frontend directory in a separate terminal window
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start Vite development server
+npm run dev
+```
+
+> **Note for Windows Node v24 users**: If Windows certificate policies trigger SSL leaf signature warnings during npm install, pass `$env:NODE_OPTIONS="--use-system-ca"` in PowerShell.
+
+Once started, open your browser at:
+- **Nyaya AI Web App**: [http://localhost:5173/](http://localhost:5173/)
+- **Direct Workspace Deep-Link**: [http://localhost:5173/#overview](http://localhost:5173/#overview)
+- **Direct Intake Deep-Link**: [http://localhost:5173/#intake](http://localhost:5173/#intake)
+- **Direct Evidence Deep-Link**: [http://localhost:5173/#evidence](http://localhost:5173/#evidence)
+- **Direct Sources Deep-Link**: [http://localhost:5173/#sources](http://localhost:5173/#sources)
+- **Direct Studio Deep-Link**: [http://localhost:5173/#studio](http://localhost:5173/#studio)
+
+---
+
+### 4. Running Backend Tests
+
+The test suite validates health endpoints, CORS, the mock LLM/embedding abstractions, and provider key validation:
+
+```bash
+# From the repository root (with backend virtual environment activated):
+pytest tests/ -v
+```
+
+---
+
+## Configuration Reference
+
+Key variables in `.env`:
+
+| Variable | Default | Description |
+|---|---|---|
+| `APP_NAME` | `Nyaya AI Backend` | Name of the service |
+| `ENVIRONMENT` | `development` | Deployment environment (`development` / `production`) |
+| `PORT` | `8000` | Port for FastAPI server |
+| `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Allowed frontend origins |
+| `LLM_PROVIDER` | `mock` | Active LLM provider (`mock`, `gemini`) |
+| `GEMINI_API_KEY` | `""` | Google Gemini API key |
+| `GEMINI_MODEL` | `gemini-1.5-pro` | Gemini model name |
+| `EMBEDDING_PROVIDER` | `mock` | Active vector embedding engine (`mock`, `gemini`, `fastembed`) |
+| `DATABASE_URL` | `sqlite:///./nyaya_ai.db` | Local SQLite database URL |
+| `CHROMA_PERSIST_DIRECTORY` | `./chroma_db` | Embedded ChromaDB storage path |
+| `VITE_API_BASE_URL` | `http://localhost:8000` | Backend API URL for frontend |
+
+---
+
+## Legal & Compliance Disclaimer
+
+Nyaya AI provides automated legal research and informational assistance based on public statutes. It does not provide formal legal advice, representation, or advocacy under the Advocates Act, 1961. Consult a licensed legal practitioner for formal courtroom proceedings.
+
+
+
+========== docs/architecture.md ==========
+# Nyaya AI Architecture Specification
+
+## 1. System Overview
+
+**Nyaya AI** (à¤¨à¥à¤¯à¤¾à¤¯ AI) is an AI-powered legal assistance platform engineered specifically for ordinary Indian citizens facing consumer disputes under the **Consumer Protection Act, 2019**, **Consumer Protection (E-Commerce) Rules, 2020**, and related statutory frameworks.
+
+The architectural foundation guarantees **grounded legal precision and zero hallucination**:
+- Every statutory section cited must originate from an indexed, verified legal database.
+- Every complaint draft produced must follow established Indian consumer forum jurisdictions (District Commission, State Commission, NCDRC).
+- The AI architecture cleanly separates probabilistic conversational intake from deterministic statutory verification.
+
+---
+
+## 2. Agreed Technology Stack
+
+| Tier | Technology | Role & Justification |
+|---|---|---|
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS | Fast compilation, static typing, accessible UI, lightweight client runtime. |
+| **Backend** | Python 3.11+, FastAPI, Pydantic v2, Uvicorn | Async performance, declarative request/response validation, clean modular design. |
+| **LLM Provider** | Google Gemini API (swappable interface) | Primary reasoning engine for statutory interpretation, fact extraction, and document drafting. |
+| **Relational Storage** | SQLite | Serverless, zero-config relational storage for case facts, intake sessions, and audit trails. |
+| **Vector Database** | ChromaDB (local persistence) | Lightweight, self-contained embedded vector store for indexing statutory bare acts and precedents. |
+| **Testing** | Pytest, FastAPI TestClient, pytest-asyncio | Continuous verification of API contracts, data models, and swappable provider logic. |
+
+---
+
+## 3. Monorepo Structure
+
+```
+nyaya-ai/
+â”œâ”€â”€ backend/                  # FastAPI Application
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ ai/               # AI orchestration & provider interfaces
+â”‚   â”‚   â”‚   â”œâ”€â”€ llm/          # BaseLLMProvider, MockLLMProvider, GeminiLLMProvider, Factory
+â”‚   â”‚   â”‚   â””â”€â”€ embeddings/   # BaseEmbeddingProvider, MockEmbeddingProvider, Factory
+â”‚   â”‚   â”œâ”€â”€ api/              # HTTP routers & endpoints
+â”‚   â”‚   â”‚   â””â”€â”€ routes/       # Endpoint handlers (health.py)
+â”‚   â”‚   â”œâ”€â”€ core/             # Configuration & environment management (config.py)
+â”‚   â”‚   â”œâ”€â”€ models/           # Pydantic data schemas (schemas.py)
+â”‚   â”‚   â”œâ”€â”€ services/         # Domain business logic
+â”‚   â”‚   â”‚   â”œâ”€â”€ case_intelligence/   # Grievance structuring & fact extraction
+â”‚   â”‚   â”‚   â”œâ”€â”€ rag/                 # Statutory semantic & keyword retrieval
+â”‚   â”‚   â”‚   â”œâ”€â”€ citation/            # Anti-hallucination verification
+â”‚   â”‚   â”‚   â”œâ”€â”€ document_generation/ # Complaint & notice drafting
+â”‚   â”‚   â”‚   â””â”€â”€ ingestion/           # Statute & precedent parsing
+â”‚   â”‚   â””â”€â”€ main.py           # FastAPI application entrypoint
+â”‚   â”œâ”€â”€ requirements.txt      # Python dependencies
+â”‚   â””â”€â”€ .env.example          # Backend environment template
+â”œâ”€â”€ frontend/                 # React + TypeScript + Vite + Tailwind CSS
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ components/       # Accessible UI components (Navbar, Hero, Features, SystemStatus, Footer)
+â”‚   â”‚   â”œâ”€â”€ services/         # HTTP API client services (api.ts)
+â”‚   â”‚   â”œâ”€â”€ App.tsx           # Main application view
+â”‚   â”‚   â”œâ”€â”€ main.tsx          # React DOM entrypoint
+â”‚   â”‚   â”œâ”€â”€ vite-env.d.ts     # Vite environment types
+â”‚   â”‚   â””â”€â”€ index.css         # Tailwind styles & typography
+â”‚   â”œâ”€â”€ package.json          # Node dependencies & build scripts
+â”‚   â”œâ”€â”€ tsconfig.json         # TypeScript compiler configuration
+â”‚   â”œâ”€â”€ vite.config.ts        # Vite build configuration
+â”‚   â””â”€â”€ tailwind.config.js    # Design tokens & color system
+â”œâ”€â”€ docs/                     # Architectural & roadmap documentation
+â”‚   â”œâ”€â”€ architecture.md
+â”‚   â””â”€â”€ roadmap.md
+â”œâ”€â”€ tests/                    # Backend & integration tests
+â”‚   â”œâ”€â”€ test_health.py
+â”‚   â””â”€â”€ test_llm_provider.py
+â”œâ”€â”€ .gitignore
+â”œâ”€â”€ .env.example              # Monorepo root environment template
+â”œâ”€â”€ PROJECT_CONTEXT.md        # Master technical context for development handoff
+â””â”€â”€ README.md                 # Setup, run, and contributor documentation
+```
+
+---
+
+## 4. Replaceable Provider Abstraction
+
+Nyaya AI decouples all generative AI and embedding logic from third-party vendor SDKs via abstract base classes:
+
+### LLM Interface (`backend/app/ai/llm/base.py`)
+```python
+class BaseLLMProvider(ABC):
+    @abstractmethod
+    async def generate(self, prompt: str, system_prompt: Optional[str] = None, temperature: float = 0.0, max_tokens: int = 1024, **kwargs: Any) -> str:
+        """Generate complete text response."""
+        pass
+
+    @abstractmethod
+    async def stream(self, prompt: str, system_prompt: Optional[str] = None, temperature: float = 0.0, max_tokens: int = 1024, **kwargs: Any) -> AsyncIterator[str]:
+        """Stream response tokens asynchronously."""
+        pass
+```
+
+- **`MockLLMProvider`**: Used for unit tests, offline development, and CI environments without network latency or API costs.
+- **`GeminiLLMProvider`**: Primary provider interface for Google Gemini API models (`gemini-1.5-pro`).
+- **`get_llm_provider(settings)`**: Factory that instantiates the active provider based on the `LLM_PROVIDER` environment variable.
+
+---
+
+## 5. Placeholder UI Functionality & User Flows
+
+The current frontend implements the foundational landing page and health verification interface. The following elements are placeholders designed for upcoming milestones:
+
+1. **Hero Action Links**:
+   - `Explore Foundation Architecture` â€” Anchors to `#architecture` (Features section).
+   - `Check API Health` â€” Anchors to `#system-status` (Live Diagnostic section).
+2. **Feature Capability Cards**:
+   - All 6 cards in `Features.tsx` (*Conversational Intake*, *Structured Case Summary*, *Evidence & Missing Fact Audit*, *Grounded Statutory Retrieval*, *Strict Citation Verification*, *Editable Legal Drafts*) display the status badge `"Planned for subsequent milestones"`.
+   - The interactive chat panel and document generation workspace are planned for Milestones 3 and 6.
+3. **System Status Section**:
+   - `Recheck Status` button is **fully operational**: triggers real HTTP requests to `/api/health` and displays live backend metrics (status, version, active LLM provider, embedding engine, timestamp).
+
+
+
+========== docs/roadmap.md ==========
+# Nyaya AI Project Roadmap
+
+## Milestone 1: Initial Project Foundation (Completed)
+- [x] Monorepo directory structure created (`frontend/`, `backend/`, `docs/`, `tests/`).
+- [x] FastAPI backend initialized with CORS, environment configuration, and root routing.
+- [x] Health diagnostic endpoints implemented (`/health`, `/api/health`).
+- [x] Swappable provider abstraction interfaces established (`BaseLLMProvider`, `BaseEmbeddingProvider`).
+- [x] React 18 + Vite + TypeScript + Tailwind CSS frontend initialized with civic legal styling.
+- [x] Frontend health status polling widget with live diagnostic indicators.
+- [x] Environment configuration templates (`.env.example`).
+- [x] Automated test suite created with Pytest.
+
+---
+
+## Milestone 2: Technical Architecture Baseline & Stack Alignment (Completed)
+- [x] Technology stack aligned to agreed architecture: **Gemini API**, **ChromaDB**, **SQLite**, **FastAPI**, and **React**.
+- [x] Gemini API provider contract implemented (`GeminiLLMProvider`) with configuration safeguards.
+- [x] Local relational storage architecture defined with SQLite (`DATABASE_URL="sqlite:///./nyaya_ai.db"`).
+- [x] Vector store architecture aligned to embedded ChromaDB (`CHROMA_PERSIST_DIRECTORY="./chroma_db"`).
+- [x] Removed cloud-vendor dependencies (Supabase/Claude) to ensure localized, privacy-compliant execution.
+- [x] Verified full test suite (6/6 unit & API integration tests passing).
+- [x] Verified production frontend build (`vite build` passing with zero TypeScript errors).
+- [x] Comprehensive documentation updated for engineering handoff (`PROJECT_CONTEXT.md`, `README.md`, `docs/architecture.md`).
+
+---
+
+## Milestone 3: Conversational Case Intake & Fact Extraction
+- [ ] Multi-turn conversational flow to gather consumer dispute details.
+- [ ] Structured extraction schema (Pydantic model) for case facts:
+  - Complainant and Opposite Party identities.
+  - Transaction date, payment mode, and order/transaction reference numbers.
+  - Invoiced amount and product/service category.
+  - Nature of grievance (defective goods, deficiency in service, unfair trade practices, misleading advertisements).
+  - Quantified relief sought (refund, product replacement, compensation for mental agony, litigation costs).
+- [ ] Missing facts audit and proactive follow-up question engine.
+- [ ] SQLite schema and repository models for persisting user intake sessions and case facts.
+
+---
+
+## Milestone 4: Statutory Legal Ingestion & ChromaDB Vector RAG
+- [ ] Statutory data ingestion & chunking pipeline:
+  - Consumer Protection Act, 2019 (all 107 sections and schedules).
+  - Consumer Protection (E-Commerce) Rules, 2020.
+  - Consumer Protection (Consumer Disputes Redressal Commissions) Rules, 2020.
+  - Landmark precedent summaries from NCDRC and Supreme Court of India.
+- [ ] Embedding generation using Gemini embeddings / local sentence transformers into ChromaDB collections.
+- [ ] Hybrid search implementation (dense semantic search + BM25 keyword matching for exact section lookups).
+
+---
+
+## Milestone 5: Anti-Hallucination & Citation Verification Layer
+- [ ] Automated statutory citation extraction engine.
+- [ ] Strict cross-referencing against indexed bare acts before surfacing any legal claim.
+- [ ] Algorithmic safeguard: rejection or flagging of ungrounded legal claims or fabricated section numbers.
+- [ ] Confidence scoring for statutory applicability and consumer forum jurisdictional matching.
+
+---
+
+## Milestone 6: Case Briefing & Legal Document Drafting
+- [ ] Pre-litigation Legal Notice generator (addressed to merchant/vendor giving statutory 15-day rectification window).
+- [ ] National Consumer Helpline (NCH / INGRAM) grievance filing draft.
+- [ ] Formal Consumer Commission complaint petition builder tailored to pecuniary jurisdiction under CPA 2019:
+  - District Commission: Claims up to â‚¹50 Lakhs.
+  - State Commission: Claims from â‚¹50 Lakhs to â‚¹2 Crores.
+  - National Commission (NCDRC): Claims exceeding â‚¹2 Crores.
+- [ ] Document export in printable PDF and editable text/DOCX formats.
+
+---
+
+## Milestone 7: End-to-End Evaluation & Citizen Workspace
+- [ ] Benchmark test suite with synthetic and anonymized real-world Indian consumer dispute scenarios.
+- [ ] Grounding and factual accuracy evaluation harness.
+- [ ] Multi-panel citizen legal workspace (Conversational Intake, Case Fact Summary, Evidence Checklist, Statutory Sources Viewer, Document Editor).
+
+
+
+========== backend/requirements.txt ==========
+# Core API & Runtime
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0
+pydantic-settings>=2.4.0
+python-dotenv>=1.0.1
+
+# Testing
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
+httpx>=0.27.0
+
+
+
+========== backend/app/main.py ==========
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import get_settings
+from app.api.routes import health_router
+
+settings = get_settings()
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    description="Backend API for Nyaya AI â€” AI-powered legal assistance platform for Indian consumer disputes.",
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
+)
+
+# CORS Middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register health check routes
+app.include_router(health_router, prefix="/api")
+app.include_router(health_router)  # Also accessible directly at /health
+
+
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint welcoming API consumers and pointing to documentation."""
+    return {
+        "service": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "status": "operational",
+        "documentation": "/docs" if settings.DEBUG else "disabled",
+        "health_check": "/api/health",
+    }
+
+
+
+========== backend/app/core/config.py ==========
+from functools import lru_cache
+from typing import List
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables or .env file."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+    APP_NAME: str = "Nyaya AI Backend"
+    APP_VERSION: str = "0.1.0"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
+    PORT: int = 8000
+    HOST: str = "0.0.0.0"
+
+    # CORS configuration
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    # LLM Settings (Primary: Gemini API, with swappable mock/fallback)
+    LLM_PROVIDER: str = "mock"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-1.5-pro"
+
+    # Embedding Settings
+    EMBEDDING_PROVIDER: str = "mock"
+    EMBEDDING_API_KEY: str = ""
+
+    # Relational Database (SQLite)
+    DATABASE_URL: str = "sqlite:///./nyaya_ai.db"
+
+    # Vector Database (ChromaDB)
+    CHROMA_PERSIST_DIRECTORY: str = "./chroma_db"
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    """Return cached application settings singleton."""
+    return Settings()
+
+
+
+========== backend/app/ai/llm/base.py ==========
+from abc import ABC, abstractmethod
+from typing import Optional, Dict, Any, AsyncIterator
+
+
+class BaseLLMProvider(ABC):
+    """
+    Abstract interface for LLM providers.
+    Enables swapping between Claude, OpenAI, local models, or mock implementations
+    without modifying business logic or RAG pipelines.
+    """
+
+    @abstractmethod
+    async def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        **kwargs: Any
+    ) -> str:
+        """Generate a complete text response given a prompt."""
+        pass
+
+    @abstractmethod
+    async def stream(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        **kwargs: Any
+    ) -> AsyncIterator[str]:
+        """Stream response chunks asynchronously."""
+        pass
+
+
+
+========== backend/app/ai/llm/gemini_provider.py ==========
+from typing import Optional, Any, AsyncIterator
+from app.ai.llm.base import BaseLLMProvider
+
+
+class GeminiLLMProvider(BaseLLMProvider):
+    """
+    Google Gemini LLM provider implementation.
+    Adheres strictly to the BaseLLMProvider contract.
+    Decoupled via the provider interface to allow seamless testing and swapping.
+    """
+
+    def __init__(self, api_key: str, model: str = "gemini-1.5-pro"):
+        if not api_key:
+            raise ValueError(
+                "GEMINI_API_KEY is not configured. Please supply a valid key or set LLM_PROVIDER='mock'."
+            )
+        self.api_key = api_key
+        self.model = model
+        self._client = None
+
+    async def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        **kwargs: Any
+    ) -> str:
+        # Placeholder for google-genai / google-generativeai client execution in subsequent milestones
+        raise NotImplementedError("Gemini provider API execution will be activated in future milestones.")
+
+    async def stream(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        **kwargs: Any
+    ) -> AsyncIterator[str]:
+        raise NotImplementedError("Gemini streaming will be activated in future milestones.")
+        yield ""  # Generator syntax
+
+
+
+========== backend/app/ai/llm/factory.py ==========
+from app.core.config import Settings
+from app.ai.llm.base import BaseLLMProvider
+from app.ai.llm.mock_provider import MockLLMProvider
+from app.ai.llm.gemini_provider import GeminiLLMProvider
+
+
+def get_llm_provider(settings: Settings) -> BaseLLMProvider:
+    """
+    Factory function to instantiate the configured LLM provider.
+    Allows seamless switching between mock and Gemini providers without altering business logic.
+    """
+    provider_name = settings.LLM_PROVIDER.lower().strip()
+
+    if provider_name == "mock":
+        return MockLLMProvider()
+    elif provider_name == "gemini":
+        return GeminiLLMProvider(
+            api_key=settings.GEMINI_API_KEY,
+            model=settings.GEMINI_MODEL
+        )
+    else:
+        raise ValueError(
+            f"Unsupported LLM_PROVIDER: '{settings.LLM_PROVIDER}'. Supported options: 'mock', 'gemini'."
+        )
+
+
+
+========== backend/app/ai/embeddings/base.py ==========
+from abc import ABC, abstractmethod
+from typing import List
+
+
+class BaseEmbeddingProvider(ABC):
+    """
+    Abstract interface for text embedding models.
+    Decouples retrieval from any specific vectorization provider.
+    """
+
+    @abstractmethod
+    async def embed_query(self, text: str) -> List[float]:
+        """Generate vector embedding for a search query."""
+        pass
+
+    @abstractmethod
+    async def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Generate vector embeddings for a list of document chunks."""
+        pass
+
+
+
+========== backend/app/ai/embeddings/factory.py ==========
+from app.core.config import Settings
+from app.ai.embeddings.base import BaseEmbeddingProvider
+from app.ai.embeddings.mock_provider import MockEmbeddingProvider
+
+
+def get_embedding_provider(settings: Settings) -> BaseEmbeddingProvider:
+    """
+    Factory function for embedding providers.
+    """
+    provider_name = settings.EMBEDDING_PROVIDER.lower().strip()
+
+    if provider_name == "mock":
+        return MockEmbeddingProvider()
+    else:
+        raise ValueError(
+            f"Unsupported EMBEDDING_PROVIDER: '{settings.EMBEDDING_PROVIDER}'. Supported options: 'mock'."
+        )
+
+
+
+========== backend/app/models/schemas.py ==========
+from datetime import datetime, timezone
+from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field
+
+
+class HealthResponse(BaseModel):
+    """Schema for health check responses."""
+    status: str = Field(default="healthy", description="Current service health status")
+    app_name: str = Field(description="Name of the service")
+    version: str = Field(description="Service release version")
+    environment: str = Field(description="Current running environment")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp of the health check"
+    )
+    details: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Detailed diagnostic metrics"
+    )
+
+
+
+========== frontend/package.json ==========
+{
+  "name": "nyaya-ai-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
+
+
+
+========== frontend/src/services/api.ts ==========
+export interface HealthStatus {
+  status: string;
+  app_name: string;
+  version: string;
+  environment: string;
+  timestamp: string;
+  details?: {
+    llm_provider?: string;
+    embedding_provider?: string;
+    debug?: boolean;
+  };
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+export async function fetchHealthStatus(): Promise<HealthStatus> {
+  const response = await fetch(`${API_BASE_URL}/api/health`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Health check failed with status code ${response.status}`);
+  }
+
+  return response.json();
+}
+
+
+
+========== frontend/src/screens/IntakeScreen.tsx ==========
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  ChatMessage, 
+  INITIAL_CHAT, 
+  DEMO_CASE 
+} from '../data/demoCase';
+import { 
+  Send, 
+  Sparkles, 
+  Bot, 
+  User, 
+  ArrowRight, 
+  ShieldAlert, 
+  FileSpreadsheet,
+  MessageSquareQuote
+} from 'lucide-react';
+
+interface IntakeScreenProps {
+  onNotify: (type: 'success' | 'info' | 'warning', title: string, msg?: string) => void;
+  onProceedToSummary: () => void;
+}
+
+const SAMPLE_PROMPT_CHIPS = [
+  "Can I demand interest on the â‚¹64,999 refund?",
+  "What if NexaCart claims customer physical damage?",
+  "Is sending a 15-day legal notice mandatory before filing?",
+  "Which District Commission has jurisdiction over this?",
+];
+
+export const IntakeScreen: React.FC<IntakeScreenProps> = ({ 
+  onNotify, 
+  onProceedToSummary 
+}) => {
+  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_CHAT);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  const generateSimulatedReply = (userQuery: string): { text: string; facts?: { label: string; value: string }[] } => {
+    const q = userQuery.toLowerCase();
+
+    if (q.includes('interest')) {
+      return {
+        text: "Yes, absolutely. Under Section 39(1)(d) of the Consumer Protection Act, 2019, consumer forums routinely award interest (typically 9% to 12% per annum) on the principal consideration from the date of payment until realized, as compensatory restitution for withheld consumer funds.",
+        facts: [{ label: "Interest Claim", value: "12% p.a. statutory interest" }]
+      };
+    } else if (q.includes('damage') || q.includes('blame') || q.includes('broke')) {
+      return {
+        text: "The law protects you here: you possess Job Sheet #AS-902 from the brand's authorized service engineer conclusively certifying that the fault was an internal motherboard/controller defect with zero external physical impact. In law, an authorized inspection report takes precedence over an e-commerce customer support executive's informal claim.",
+        facts: [{ label: "Rebuttal Evidence", value: "Brand Engineer Job-Sheet #AS-902" }]
+      };
+    } else if (q.includes('notice') || q.includes('mandatory')) {
+      return {
+        text: "While the Consumer Protection Act does not make a pre-litigation notice strictly mandatory prior to filing a complaint under Section 35, issuing a formal 15-day Legal Notice is standard and highly recommended legal practice. It gives the opposite party a final opportunity to settle and establishes bad faith if they fail to rectify.",
+        facts: [{ label: "Pre-Litigation Step", value: "15-Day Formal Legal Notice" }]
+      };
+    } else if (q.includes('jurisdiction') || q.includes('district') || q.includes('court') || q.includes('bengaluru')) {
+      return {
+        text: "Under Section 34 of CPA 2019, you have the statutory right to file the complaint where the complainant resides or personally works for gain (Bengaluru Urban). Because the claim is â‚¹84,999 (well below â‚¹50 Lakhs), the District Consumer Commission, Bengaluru Urban has sole pecuniary and territorial jurisdiction.",
+        facts: [{ label: "Jurisdiction", value: "District Commission, Bengaluru Urban" }]
+      };
+    } else {
+      return {
+        text: `Thank you for clarifying: "${userQuery.slice(0, 75)}...". I have incorporated this into your case factual brief. Would you like to review the generated evidence audit next or inspect the pre-litigation legal notice draft?`,
+        facts: [{ label: "Fact Added", value: "User Clarification Logged" }]
+      };
+    }
+  };
+
+  const handleSendMessage = (textToSend?: string) => {
+    const text = textToSend || inputValue;
+    if (!text.trim()) return;
+
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'user',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      content: text.trim(),
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setInputValue('');
+    setIsTyping(true);
+
+    // Realistic smart response delay
+    setTimeout(() => {
+      const responseData = generateSimulatedReply(text);
+      const assistantMsg: ChatMessage = {
+        id: `msg-${Date.now() + 1}`,
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        content: responseData.text,
+        extractedFacts: responseData.facts,
+      };
+
+      setMessages(prev => [...prev, assistantMsg]);
+      setIsTyping(false);
+      onNotify('info', 'Case Intelligence Updated', 'New legal analysis added to active case.');
+    }, 700);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-200">
+      {/* Left 2 Cols: Interactive Conversational Assistant */}
+      <div className="lg:col-span-2 flex flex-col h-[700px] bg-white rounded-2xl border border-nyaya-cream-dark shadow-warm overflow-hidden">
+        {/* Chat Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-nyaya-cream-light flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-nyaya-plum flex items-center justify-center text-nyaya-orange shadow-sm">
+              <Bot className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-sm font-bold font-serif text-nyaya-plum">
+                  Nyaya Legal Intake Guide
+                </h3>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Consumer Protection Act, 2019
+                </span>
+              </div>
+              <p className="text-[11px] text-nyaya-text-secondary">
+                Conversational fact extraction for Indian consumer grievances
+              </p>
+            </div>
+          </div>
+
+          <div className="text-[11px] font-medium text-slate-400 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+            Interactive Simulation
+          </div>
+        </div>
+
+        {/* Message Stream */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-nyaya-cream/40">
+          {messages.map((msg) => {
+            const isUser = msg.sender === 'user';
+            return (
+              <div
+                key={msg.id}
+                className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+              >
+                {/* Avatar */}
+                <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
+                  isUser 
+                    ? 'bg-nyaya-orange text-white shadow-orange-sm' 
+                    : 'bg-nyaya-plum text-nyaya-yellow'
+                }`}>
+                  {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                </div>
+
+                {/* Message Body */}
+                <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
+                  isUser 
+                    ? 'bg-nyaya-plum text-white rounded-tr-none shadow-sm' 
+                    : 'bg-white text-nyaya-plum rounded-tl-none border border-slate-200/80 shadow-warm'
+                }`}>
+                  <p>{msg.content}</p>
+
+                  {/* Fact Extraction Card attached to Assistant messages */}
+                  {msg.extractedFacts && msg.extractedFacts.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5">
+                      <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-nyaya-orange tracking-wider">
+                        <Sparkles className="w-3 h-3" />
+                        <span>Extracted Case Metadata</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {msg.extractedFacts.map((fact, idx) => (
+                          <div key={idx} className="p-2 rounded bg-nyaya-cream border border-nyaya-cream-dark text-xs">
+                            <span className="text-[10px] text-slate-400 block uppercase font-medium">{fact.label}</span>
+                            <span className="font-semibold text-nyaya-plum">{fact.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={`text-[10px] mt-2 text-right ${isUser ? 'text-slate-300' : 'text-slate-400'}`}>
+                    {msg.timestamp}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {isTyping && (
+            <div className="flex items-center space-x-2 text-slate-400 text-xs italic p-2 bg-white/70 rounded-xl w-32 border border-slate-200">
+              <Bot className="w-3.5 h-3.5 text-nyaya-orange animate-spin" />
+              <span>Analyzing law...</span>
+            </div>
+          )}
+
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* Suggested Quick Prompt Chips */}
+        <div className="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap">
+          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider shrink-0 flex items-center gap-1">
+            <MessageSquareQuote className="w-3 h-3 text-nyaya-orange" />
+            Quick Prompts:
+          </span>
+          {SAMPLE_PROMPT_CHIPS.map((chip, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSendMessage(chip)}
+              className="px-2.5 py-1 rounded-full bg-nyaya-lavender text-nyaya-plum hover:bg-nyaya-orange-light hover:text-nyaya-orange transition-colors text-xs font-medium shrink-0 border border-nyaya-lavender-border"
+            >
+              {chip}
+            </button>
+          ))}
+        </div>
+
+        {/* Input Bar */}
+        <div className="p-4 bg-white border-t border-slate-200">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              placeholder="Ask a question about your consumer dispute, refund rights, or evidence..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="flex-1 text-xs sm:text-sm px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-nyaya-orange bg-nyaya-cream-light"
+            />
+            <button
+              type="submit"
+              disabled={!inputValue.trim()}
+              className="px-5 py-3 rounded-xl bg-nyaya-orange hover:bg-nyaya-orange-hover disabled:opacity-40 text-white text-xs font-semibold shadow-orange-sm transition-all flex items-center gap-1.5 shrink-0"
+            >
+              <span>Send</span>
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Right Col: Live Case Fact Sheet */}
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl border border-nyaya-cream-dark p-6 shadow-warm">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <div className="flex items-center space-x-2">
+              <FileSpreadsheet className="w-4 h-4 text-nyaya-orange" />
+              <h4 className="text-sm font-bold font-serif text-nyaya-plum">
+                Live Case Fact Sheet
+              </h4>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Intake 80%
+            </span>
+          </div>
+
+          <div className="space-y-3.5 text-xs">
+            <div>
+              <span className="text-slate-400 block font-medium uppercase text-[10px]">Complainant</span>
+              <span className="font-semibold text-nyaya-plum">{DEMO_CASE.complainant.name}</span>
+              <span className="text-slate-500 block text-[11px]">{DEMO_CASE.complainant.city}</span>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-slate-400 block font-medium uppercase text-[10px]">Opposite Party</span>
+              <span className="font-semibold text-nyaya-plum">{DEMO_CASE.oppositeParty.name}</span>
+              <span className="text-slate-500 block text-[11px]">{DEMO_CASE.oppositeParty.designation}</span>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-slate-400 block font-medium uppercase text-[10px]">Disputed Transaction</span>
+              <span className="font-semibold text-nyaya-plum">{DEMO_CASE.transaction.product}</span>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-slate-500">Amount Paid:</span>
+                <span className="font-bold text-nyaya-orange">â‚¹{DEMO_CASE.transaction.amountPaid.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-slate-500">
+                <span>Order ID:</span>
+                <span className="font-mono">{DEMO_CASE.transaction.orderId}</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-slate-400 block font-medium uppercase text-[10px]">Identified Cause of Action</span>
+              <span className="font-semibold text-nyaya-plum block mt-0.5">
+                Statutory Defect & Unfair Trade Practice
+              </span>
+              <span className="text-slate-500 text-[11px] block mt-0.5">
+                CPA 2019 Section 2(10) & Section 2(47)(viii)
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-slate-100">
+            <button
+              onClick={onProceedToSummary}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-nyaya-plum hover:bg-nyaya-plum-light text-white text-xs font-semibold shadow-sm transition-all"
+            >
+              <span>View Case Brief & Timeline</span>
+              <ArrowRight className="w-4 h-4 text-nyaya-yellow" />
+            </button>
+          </div>
+        </div>
+
+        {/* Citizen Guidance Card */}
+        <div className="bg-nyaya-cream-light rounded-2xl border border-nyaya-cream-dark p-5 text-xs text-nyaya-text-secondary space-y-3">
+          <div className="flex items-center gap-2 text-nyaya-plum font-bold font-serif text-sm">
+            <ShieldAlert className="w-4 h-4 text-nyaya-orange" />
+            <span>Why Accurate Intake Matters</span>
+          </div>
+          <p className="leading-relaxed">
+            Consumer commissions in India require precise dates for cause of action to verify statutory limitation under Section 69. 
+            All details gathered conversationally are automatically organized into your formal complaint petition.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+

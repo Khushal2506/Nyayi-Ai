@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #FFF8EF;
+    color: #17152B;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Warm styled scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FFF8EF;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D7CCE9;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C8BEDE;
+  }
+}
+
+/* Notion-style editable document typography */
+.notion-doc {
+  line-height: 1.75;
+  color: #17152B;
+}
+
+.notion-doc h1 {
+  font-family: 'Newsreader', 'Merriweather', serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #17152B;
+}
+
+.notion-doc h2 {
+  font-family: 'Newsreader', 'Merriweather', serif;
+  font-weight: 600;
+  font-size: 1.35rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #17152B;
+}
+
+.notion-doc p {
+  margin-bottom: 0.85rem;
+  font-size: 0.95rem;
+}
