@@ -30,7 +30,7 @@ const CAPABILITIES = [
   {
     icon: FileText,
     title: "Editable Legal Drafts",
-    description: "Generates standardized legal notices, National Consumer Helpline grievance texts, and District Commission complaint submissions ready for filing.",
+    description: "Helps users organize complaint information and prepare structured drafts for review. Document generation is not yet connected.",
   },
 ];
 

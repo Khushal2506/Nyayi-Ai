@@ -1,15 +1,15 @@
 import React from 'react';
-import { 
-  Scale, 
-  ArrowRight, 
-  MessageSquare, 
-  FileSpreadsheet, 
-  ShieldCheck, 
-  FileText, 
-  Sparkles, 
-  Laptop, 
-  Plane, 
-  ShoppingBag, 
+import {
+  Scale,
+  ArrowRight,
+  MessageSquare,
+  FileSpreadsheet,
+  ShieldCheck,
+  FileText,
+  Sparkles,
+  Laptop,
+  Plane,
+  ShoppingBag,
   Building2
 } from 'lucide-react';
 import { SystemStatus } from '../components/SystemStatus';
@@ -48,7 +48,7 @@ const COMMON_DISPUTES = [
     tag: "Real Estate & Housing",
     title: "Undue Possession Delay by Developer",
     scenario: "Builder exceeds contract delivery date by over 12 months with vague force majeure excuses.",
-    statute: "NCDRC Precedents & CPA 2019 § 2(11)",
+    statute: "Illustrative CPA 2019 reference — verify applicability",
     relief: "Delayed possession interest or principal exit",
   },
 ];
@@ -162,9 +162,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWorkspace }) => 
 
           {/* Subtitle */}
           <p className="max-w-3xl mx-auto text-base sm:text-lg text-nyaya-text-secondary leading-relaxed mb-10">
-            Faced a defective product, arbitrary refund denial, or service deficiency? 
-            Nyaya AI structures your grievance into an un-hallucinated case brief, audits your evidence, 
-            and generates ready-to-file legal notices under the <strong>Consumer Protection Act, 2019</strong>.
+            Faced a defective product, arbitrary refund denial, or service deficiency?
+            Nyaya AI structures your grievance into a structured case brief, audits your evidence,
+            and helps prepare complaint information for review under the <strong>Consumer Protection Act, 2019</strong>.
           </p>
 
           {/* Call to Actions */}
@@ -192,7 +192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWorkspace }) => 
               <strong className="font-semibold block text-amber-950 mb-0.5">
                 Statutory Informational Disclaimer
               </strong>
-              Nyaya AI is an automated legal research and drafting assistant based on public Indian statutes. 
+              Nyaya AI is an automated legal research and drafting assistant based on public Indian statutes.
               It does not provide formal legal representation or create an advocate-client relationship under the Advocates Act, 1961.
             </div>
           </div>
@@ -210,7 +210,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWorkspace }) => 
               From Grievance to Legal Notice in Minutes
             </h2>
             <p className="text-sm text-nyaya-text-secondary mt-3">
-              Unlike generic chatbots that guess sections and fabricate precedents, Nyaya AI executes a rigorous four-phase verification pipeline.
+              Nyaya AI organizes complaint facts, highlights missing information, and presents illustrative legal references for user review.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWorkspace }) => 
                 Supported Consumer Disputes in India
               </h2>
               <p className="text-sm text-nyaya-text-secondary mt-2 max-w-xl">
-                Trained on real statutory definitions and NCDRC precedents for transactions up to ₹50 Lakhs before District Commissions.
+                Illustrative consumer-law references for orientation. Verify current official text and jurisdiction before relying on any provision.
               </p>
             </div>
 
