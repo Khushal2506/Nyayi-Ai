@@ -94,11 +94,11 @@ class GeminiLLMProvider(BaseLLMProvider):
                     return self._extract_text(response)
                 except genai_errors.APIError as exc:
                     status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
-                    if status != 503 or attempt == 3:
+                    if status not in (503, 504) or attempt == 3:
                         raise
                     wait_seconds = 2 ** (attempt + 1)
                     logger.warning(
-                        "Gemini returned 503; retrying in %s seconds (attempt %s/3)",
+                        "Gemini returned 503/504; retrying in %s seconds (attempt %s/3)",
                         wait_seconds, attempt + 1
                     )
                     await asyncio.sleep(wait_seconds)
@@ -129,3 +129,4 @@ class GeminiLLMProvider(BaseLLMProvider):
             **kwargs,
         )
         yield result
+
