@@ -1,5 +1,6 @@
 
 import asyncio
+import logging
 from typing import Any, AsyncIterator, Optional
 
 from google import genai
@@ -7,6 +8,8 @@ from google.genai import errors as genai_errors
 from google.genai import types
 
 from app.ai.llm.base import BaseLLMProvider, LLMProviderError
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiLLMProvider(BaseLLMProvider):
@@ -80,13 +83,25 @@ class GeminiLLMProvider(BaseLLMProvider):
         )
 
         try:
-            response = await asyncio.to_thread(
-                self._client.models.generate_content,
-                model=self.model,
-                contents=prompt,
-                config=config,
-            )
-            return self._extract_text(response)
+            for attempt in range(4):
+                try:
+                    response = await asyncio.to_thread(
+                        self._client.models.generate_content,
+                        model=self.model,
+                        contents=prompt,
+                        config=config,
+                    )
+                    return self._extract_text(response)
+                except genai_errors.APIError as exc:
+                    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+                    if status != 503 or attempt == 3:
+                        raise
+                    wait_seconds = 2 ** (attempt + 1)
+                    logger.warning(
+                        "Gemini returned 503; retrying in %s seconds (attempt %s/3)",
+                        wait_seconds, attempt + 1
+                    )
+                    await asyncio.sleep(wait_seconds)
 
         except LLMProviderError:
             raise
