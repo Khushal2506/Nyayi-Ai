@@ -1,4 +1,3 @@
-import logging
 import json
 import logging
 import re
@@ -64,7 +63,7 @@ def local_extract(complaint: str) -> IntakeResponse:
     if amount_match:
         amount = "₹" + (amount_match.group(1) or amount_match.group(2))
 
-    # Extract dates and classify them using nearby wording.
+    # Extract dates using the meaning of the complete sentence.
     date_pattern = (
         r"\b\d{1,2}\s+"
         r"(?:January|February|March|April|May|June|July|August|"
@@ -76,28 +75,42 @@ def local_extract(complaint: str) -> IntakeResponse:
     delivery_date = None
     issue_date = None
 
-    for match in re.finditer(date_pattern, text, re.IGNORECASE):
-        date = match.group(0)
-        # Classify using only the sentence containing this date. A fixed
-        # look-behind window can accidentally borrow "delivered" from the
-        # previous sentence and misclassify a later refund-request date.
-        sentence_start = max(
-            text.rfind(mark, 0, match.start()) for mark in (".", "!", "?", "\n")
-        ) + 1
-        # Use wording before the date only. Phrases after a refund date such
-        # as "I have not received it" must not reclassify that date as delivery.
-        context = text[sentence_start:match.start()].lower()
+    sentences = re.split(r"(?<=[.!?])\s+|\n+", text)
+    for sentence in sentences:
+        dates = re.findall(date_pattern, sentence, re.IGNORECASE)
+        if not dates:
+            continue
 
-        if any(word in context for word in ["arrived", "delivered", "received"]):
-            delivery_date = delivery_date or date
-        elif any(word in context for word in [
-            "refund", "complaint", "reported", "requested", "issue", "not working", "defect"
+        context = sentence.lower()
+        if any(word in context for word in [
+            "delivered", "delivery", "arrived", "received"
         ]):
-            issue_date = issue_date or date
+            delivery_date = delivery_date or dates[0]
         elif any(word in context for word in [
-            "purchased", "bought", "ordered", "order"
+            "purchased", "bought", "ordered", "placed the order", "order date"
         ]):
-            order_date = order_date or date
+            order_date = order_date or dates[0]
+        elif any(word in context for word in [
+            "contacted", "reported", "complained", "raised a complaint",
+            "issue occurred", "noticed the damage", "informed the seller"
+        ]):
+            issue_date = issue_date or dates[0]
+
+    # Explicitly labelled dates take priority.
+    labelled_dates = [
+        (r"(?:order|purchase)\s+date\s*[:?-]?\s*(" + date_pattern + r")", "order"),
+        (r"(?:delivery|delivered)\s+date\s*[:?-]?\s*(" + date_pattern + r")", "delivery"),
+        (r"(?:issue|incident|reported)\s+date\s*[:?-]?\s*(" + date_pattern + r")", "issue"),
+    ]
+    for pattern, field in labelled_dates:
+        labelled = re.search(pattern, text, re.IGNORECASE)
+        if labelled:
+            if field == "order":
+                order_date = labelled.group(1)
+            elif field == "delivery":
+                delivery_date = labelled.group(1)
+            else:
+                issue_date = labelled.group(1)
 
     payment = next(
         (
